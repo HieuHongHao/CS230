@@ -3,9 +3,9 @@
 #include <string.h>
 #include "items.h"
 
-void add_item(Item *head ,Item *item){
+void add_item(Item *head ,Item item){
     if(head == NULL){
-        *head = *item;
+        *head = item;
         head->nextItem = NULL;
         return;
     }
@@ -13,7 +13,7 @@ void add_item(Item *head ,Item *item){
     while(temp != NULL){
         if(temp->nextItem == NULL){
             temp->nextItem = (Item *)malloc(sizeof(item));
-            temp->nextItem = item;
+            *(temp->nextItem) = item;
             break;
         }
         temp = temp->nextItem;
@@ -33,7 +33,7 @@ void remove_item(Item * head, char * name){
     Item * prev = head;
     Item * current = head->nextItem;
     while(current !=  NULL){
-        if(!strcmp(name,current->name)){
+        if(!strcmp(name,current->name)){  // A bit weird but strcmp returns 0, so !0 means name == current->name
             prev->nextItem = current->nextItem;
             break;
         }

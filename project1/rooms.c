@@ -20,7 +20,7 @@ Room ** constructBoard(){
             char * roomNumber = malloc(length + 1);
             snprintf(roomNumber,length + 1,"%d",room);
             board[i][j] = (Room){roomNumber,(isInvalid(i-1,j)) ? NULL : &board[i-1][j],(isInvalid(i+1,j)) ? NULL : &board[i+1][j],
-            (isInvalid(i,j+1)) ? NULL : &board[i][j+1],(isInvalid(i,j-1)) ? NULL : &board[i][j-1]};
+            (isInvalid(i,j+1)) ? NULL : &board[i][j+1],(isInvalid(i,j-1)) ? NULL : &board[i][j-1],NULL,NULL};
             room++;
         }
     } 
