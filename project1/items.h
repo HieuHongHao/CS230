@@ -9,7 +9,7 @@ typedef struct Item{
 
 void add_item(Item * head ,Item item);
 
-void remove_item(Item * head, char * name);
+Item * remove_item(Item * head, char * name);
 
 
 

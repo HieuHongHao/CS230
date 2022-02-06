@@ -5,8 +5,11 @@
 #include "rooms.h"
 #include "items.h"
 #include "character.h"
-
-void distributeItems(Room **board)
+struct Avatar{
+    char * name;
+    Item * inventory;
+};
+void distributeItems(Room **board, Item* item)
 {
     int i = rand() % 3;
     int j = rand() % 3;
@@ -15,12 +18,10 @@ void distributeItems(Room **board)
     {
         if (board[i][j].itemList == NULL)
         {
-            char *itemName = malloc(100);
+            Item anItem  = item[numEquippedRooms];
             numEquippedRooms++;
-            char name[] = "Item";
-            snprintf(itemName, 38, "%s %d", name, numEquippedRooms);
             (board[i][j].itemList) = (Item *)malloc(sizeof(Item));
-            *(board[i][j].itemList) = (Item){itemName, NULL};
+            *(board[i][j].itemList) = anItem;
         }
         i = rand() % 3;
         j = rand() % 3;
@@ -60,10 +61,19 @@ int main()
 {
     srand(time(NULL));
     Room **board = constructBoard();
+    Item items[6] = {
+        (Item){"Shrek Toy",NULL},
+        (Item){"Shrek Spoon",NULL},
+        (Item){"Shrek Towel",NULL},
+        (Item) {"Shrek Love Chair",NULL},
+        (Item){"Shrek Knife",NULL},
+        (Item){"Shrek Pencil",NULL}
+    };
     distributeRoom(board);
-    distributeItems(board);
+    distributeItems(board,items);
     int i = rand() % 3;
     int j = rand() % 3;
+    int m = rand() % 3;
     Room current = board[i][j];
     size_t bufferSize = 32;
     char * buffer = (char *)malloc(bufferSize);
@@ -71,6 +81,16 @@ int main()
     "look: See current room information", "go: Travel to a direction", "take: Pick up an item",
     "drop: Drop an item", "inventory: check current items","clue: make a guess"
     };
+    char characters[6][100] ={
+        "Shrek",
+        "Betas Shrek",
+        "Sigma Shrek",
+        "Giga Shrek",
+        "Shrek The Ogre",
+        "Shrek Fanboy"
+    };
+    
+    struct Avatar user = {characters[m],NULL};
     while(getline(&buffer,&bufferSize,stdin)!= -1){
         char * token = strtok(buffer,"\n");
         if(!strcmp(token,"help")){
@@ -84,6 +104,13 @@ int main()
             char * East = current.East == NULL ? "End" : current.East->name;
             char * West = current.West == NULL ? "End" : current.West->name;
             printf("%s, North: %s , South: %s, East: %s, West: %s \n",current.name,North,South,East,West);
+            printf("Current items:\n");
+            Item * temp =  current.itemList;
+            if(temp == NULL){printf("None \n");}
+            while(temp != NULL){
+                printf("%s \n",temp->name);
+                temp = temp->nextItem;
+            }
         }
         else if(!strcmp(token,"exit")){
             printf("exited \n");
@@ -107,6 +134,5 @@ int main()
             }
         }
     }
-    
     return 0;
 }
