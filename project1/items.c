@@ -3,7 +3,7 @@
 #include <string.h>
 #include "items.h"
 
-void add_item(Item *head ,Item item){
+void add_item(Item * head ,Item item){
     if(head == NULL){
         *head = item;
         head->nextItem = NULL;
@@ -36,6 +36,9 @@ Item * remove_item(Item * head, char * name){
     while(current !=  NULL){
         if(!strcmp(name,current->name)){  // A bit weird but strcmp returns 0, so !0 means name == current->name
             Item * removedItem = prev->nextItem;
+            if(removedItem->nextItem != NULL){
+                removedItem->nextItem = NULL;
+            }
             prev->nextItem = current->nextItem;
             return removedItem;
         }

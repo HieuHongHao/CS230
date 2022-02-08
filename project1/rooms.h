@@ -1,6 +1,6 @@
 #ifndef ROOM_H
 #define ROOM_H
-#define  MAX_CHARACTER 20
+
 typedef struct Room {
       char* name;
       struct Room * North;
@@ -8,16 +8,9 @@ typedef struct Room {
       struct Room * East;
       struct Room * West;
       struct Item * itemList;
-     char *character[MAX_CHARACTER];
+      struct Character * charList;
 } Room;
 
 Room ** constructBoard();
-
-
-
-
-
-
-
 
 #endif

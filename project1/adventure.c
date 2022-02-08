@@ -5,11 +5,12 @@
 #include "rooms.h"
 #include "items.h"
 #include "character.h"
+
 struct Avatar{
     char * name;
     Item * inventory;
 };
-void distributeItems(Room **board, Item* item)
+void distributeItemsAndCharacters(Room **board, Item* item, Character * characters)
 {
     int i = rand() % 3;
     int j = rand() % 3;
@@ -19,9 +20,12 @@ void distributeItems(Room **board, Item* item)
         if (board[i][j].itemList == NULL)
         {
             Item anItem  = item[numEquippedRooms];
+            Character character = characters[numEquippedRooms];
             numEquippedRooms++;
-            (board[i][j].itemList) = (Item *)malloc(sizeof(Item));
+            board[i][j].itemList = (Item *)malloc(sizeof(Item));
+            board[i][j].charList = (Character *)malloc(sizeof(Character));
             *(board[i][j].itemList) = anItem;
+            *(board[i][j].charList) = character;
         }
         i = rand() % 3;
         j = rand() % 3;
@@ -47,14 +51,34 @@ void distributeRoom(Room **board)
         k = rand() % 3;
     }
 }
-// void distributeCharacter(Room ** board)
-void move(Room * current, Room * direction, char * currentRoom ){
+
+void move(Room ** current, Room * direction, char * currentRoom , char * currChar ){
     if(direction == NULL){
-        printf("direction is not valid, please renter direction \n");
+        printf("direction is not valid, please renter go and choose a new direction \n");
         return;
     }
-    *current = *direction;
-    printf("Move to : %s\n",currentRoom);
+   Character* removed = remove_character(&((*current)->charList),currChar);
+    if(removed != NULL){
+      Character removedChar = *removed;
+      add_character(&(direction->charList),removedChar);
+    }
+    *current = direction;
+    if(removed == NULL){
+        printf("None was removed \n");
+    }else{
+        printf("Move %s to : %s\n",currChar,currentRoom);
+    }
+}
+void moveCharacter(Room ** current, char * character, Room ** board){
+    Character * temp;
+    for(int i = 0 ;  i < 3 ; i++){
+        for(int j = 0 ; j < 3; j++){
+            temp = remove_character(&(board[i][j].charList),character);
+            if(temp!= NULL){
+               add_character(&((*current)->charList),*temp);
+            }
+        }
+    }
 }
 
 int main()
@@ -69,69 +93,115 @@ int main()
         (Item){"Shrek Knife",NULL},
         (Item){"Shrek Pencil",NULL}
     };
+    Character characters[6]={
+        (Character){"Shrek",NULL},
+        (Character){"Betas Shrek",NULL},
+        (Character){"Sigma Shrek",NULL},
+        (Character){"Giga Shrek",NULL},
+        (Character){"Shrek The Ogre",NULL},
+        (Character){"Shrek Fanboy",NULL}
+    };
     distributeRoom(board);
-    distributeItems(board,items);
+    distributeItemsAndCharacters(board,items,characters);
     int i = rand() % 3;
     int j = rand() % 3;
     int m = rand() % 3;
-    Room current = board[i][j];
+    
+    Room* current ;
+    int flag = 0;
+    while (!flag)
+    {
+        if(board[i][j].charList != NULL){
+            current = &board[i][j];    
+            flag = 1;
+        }
+        else{
+            i = rand() % 3 ;
+            j = rand() % 3 ;
+        }
+    }
+    
+    struct Avatar user = {current->charList->name,NULL};
+        
+    
     size_t bufferSize = 32;
     char * buffer = (char *)malloc(bufferSize);
-    char commandTable[8][100] = {"help: See list of commands", "list: See list of items,rooms,or characters",
+    char commandTable[9][100] = {"help: See list of commands", "list: See list of items,rooms,or characters",
     "look: See current room information", "go: Travel to a direction", "take: Pick up an item",
-    "drop: Drop an item", "inventory: check current items","clue: make a guess"
-    };
-    char characters[6][100] ={
-        "Shrek",
-        "Betas Shrek",
-        "Sigma Shrek",
-        "Giga Shrek",
-        "Shrek The Ogre",
-        "Shrek Fanboy"
+    "drop: Drop an item", "inventory: check current items","clue: make a guess","exit: quit "
     };
     
-    struct Avatar user = {characters[m],NULL};
     while(getline(&buffer,&bufferSize,stdin)!= -1){
         char * token = strtok(buffer,"\n");
         if(!strcmp(token,"help")){
-            for(int i = 0 ;i < 8 ; i++){
+            for(int i = 0 ;i < 9 ; i++){
                 printf("%s\n",commandTable[i]);
             }
         }
         else if(!strcmp(token,"look")){
-            char * North = current.North == NULL ? "End" : current.North->name; 
-            char * South = current.South == NULL ? "End" : current.South->name;
-            char * East = current.East == NULL ? "End" : current.East->name;
-            char * West = current.West == NULL ? "End" : current.West->name;
-            printf("%s, North: %s , South: %s, East: %s, West: %s \n",current.name,North,South,East,West);
-            printf("Current items:\n");
-            Item * temp =  current.itemList;
+            char * North = current->North == NULL ? "End" : current->North->name; 
+            char * South = current->South == NULL ? "End" : current->South->name;
+            char * East = current->East == NULL ? "End" : current->East->name;
+            char * West = current->West == NULL ? "End" : current->West->name;
+            printf("%s, North: %s, South: %s, East: %s, West: %s \n",current->name,North,South,East,West);
+            printf("Current items in the room:\n");
+            Item * temp =  current->itemList;
             if(temp == NULL){printf("None \n");}
             while(temp != NULL){
                 printf("%s \n",temp->name);
                 temp = temp->nextItem;
             }
+            printf("Current characters in the room: \n");
+            Character * currChar = current->charList;
+            if(currChar == NULL){printf("None \n");}
+            while(currChar != NULL){
+                printf("%s \n",currChar->name);
+                currChar = currChar->nextCharacter;
+            }
+        }
+        else if(!strcmp(token,"inventory")){
+            printf("User avatar: %s \n", user.name);
+            Item * temp = user.inventory;
+            printf("Avatar inventory: \n");
+            if(temp == NULL){printf("None \n");}
+            while(temp != NULL){
+                printf("%s \n", temp->name);
+                temp = temp->nextItem;
+            }
+        }
+        else if(!strcmp(token,"go")){
+            printf("Pick a direction: north,south,east,or west\n");
+            getline(&buffer,&bufferSize,stdin);
+            char * tk = strtok(buffer,"\n");
+            if(!strcmp(tk,"north")){
+                move(&current,current->North,"north",user.name);
+            }
+            else if(!strcmp(tk,"south")){
+                move(&current,current->South,"south",user.name);
+            }
+            else if(!strcmp(tk,"east")){
+                move(&current,current->East,"east",user.name);
+            }
+            else if(!strcmp(tk,"west")){
+                move(&current,current->West,"west",user.name);
+            }
+            else{
+                printf("direction is not valid, please renter go and choose a new direction \n");
+            }
+        }
+        else if(!strcmp(token,"clue")){
+            printf("Guess a character \n");
+            getline(&buffer,&bufferSize,stdin);
+            char * tk = strtok(buffer,"\n");
+            moveCharacter(&current,tk,board);
         }
         else if(!strcmp(token,"exit")){
             printf("exited \n");
             break;
         }
-        else if(!strcmp(token,"go")){
-            printf("Pick a direction: north,south,east,or west\n");
-            getline(&buffer,&bufferSize,stdin);
-            token = strtok(buffer,"\n");
-            if(!strcmp(token,"north")){
-                move(&current,current.North,"north");
-            }
-            else if(!strcmp(token,"south")){
-                move(&current,current.South,"south");
-            }
-            else if(!strcmp(token,"east")){
-                move(&current,current.East,"east");
-            }
-            else{
-                move(&current,current.West,"west");
-            }
+        else{
+            printf("Command has space after or command is not in the list of regconized commands \n");
+            printf("Type help(no space, no uppercase) for commands look up \n");
         }
     }
     return 0;
