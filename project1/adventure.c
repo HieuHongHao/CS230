@@ -36,7 +36,7 @@ void distributeRoom(Room **board)
 {
     int m = rand() % 3;
     int k = rand() % 3;
-    char room[9][30] = {"Kitchen", "Lounge", "Study Room", "Library", "BallRoom", "Hall", "Conservatory", "Billiard Room", "Dining Room"};
+    char room[9][30] = {"Kitchen", "Lounge", "Study Room", "Library", "Ball Room", "Hall", "Conservatory", "Billiard Room", "Dining Room"};
     int assignedNameRooms = 0;
     while (assignedNameRooms < 9)
     {
@@ -76,9 +76,12 @@ void moveCharacter(Room ** current, char * character, Room ** board){
             temp = remove_character(&(board[i][j].charList),character);
             if(temp!= NULL){
                add_character(&((*current)->charList),*temp);
+               printf("%s moved to %s \n",character,(*current)->name);
+               return;
             }
         }
     }
+    printf("No charcter was moved \n");
 }
 
 int main()
@@ -122,7 +125,8 @@ int main()
     }
     
     struct Avatar user = {current->charList->name,NULL};
-        
+    Room answer = board[i][j];    
+    int cludeMade = 0;
     
     size_t bufferSize = 32;
     char * buffer = (char *)malloc(bufferSize);
@@ -136,6 +140,7 @@ int main()
         if(!strcmp(token,"help")){
             for(int i = 0 ;i < 9 ; i++){
                 printf("%s\n",commandTable[i]);
+                printf("\n");
             }
         }
         else if(!strcmp(token,"look")){
@@ -144,25 +149,32 @@ int main()
             char * East = current->East == NULL ? "End" : current->East->name;
             char * West = current->West == NULL ? "End" : current->West->name;
             printf("%s, North: %s, South: %s, East: %s, West: %s \n",current->name,North,South,East,West);
+            printf("\n");
             printf("Current items in the room:\n");
             Item * temp =  current->itemList;
-            if(temp == NULL){printf("None \n");}
+            if(temp == NULL){
+                printf("None \n");
+                printf("\n");
+            }
             while(temp != NULL){
                 printf("%s \n",temp->name);
-                temp = temp->nextItem;
+               temp = temp->nextItem;
             }
+            printf("\n");
             printf("Current characters in the room: \n");
-            Character * currChar = current->charList;
+           Character * currChar = current->charList;
             if(currChar == NULL){printf("None \n");}
             while(currChar != NULL){
                 printf("%s \n",currChar->name);
-                currChar = currChar->nextCharacter;
+               currChar = currChar->nextCharacter;
             }
         }
         else if(!strcmp(token,"inventory")){
             printf("User avatar: %s \n", user.name);
+            printf("\n");
             Item * temp = user.inventory;
             printf("Avatar inventory: \n");
+            printf("\n");
             if(temp == NULL){printf("None \n");}
             while(temp != NULL){
                 printf("%s \n", temp->name);
@@ -195,8 +207,40 @@ int main()
             char * tk = strtok(buffer,"\n");
             moveCharacter(&current,tk,board);
         }
+        else if(!strcmp(token,"take")){
+            printf("Choose an item to take(no space after the last words) \n");
+            printf("\n");
+            getline(&buffer,&bufferSize,stdin);
+            char * tk = strtok(buffer,"\n");
+            Item * removed = remove_item(&(current->itemList),tk);
+            if(removed == NULL){
+                printf("No item with given name found, please re-enter take and choose again \n");
+            }
+            else{
+                add_item(&(user.inventory),*removed);
+                printf("User took %s out of %s \n",removed->name,current->name);
+                printf("\n");
+            }
+        }
+        else if(!strcmp(token,"drop")){
+            printf("Choose an item to drop \n");
+            printf("\n");
+            getline(&buffer,&bufferSize,stdin);
+            char * tk = strtok(buffer,"\n");
+            Item * removed = remove_item(&(user.inventory),tk);
+            if(removed == NULL){
+                printf("No item with given name found, please re-enter drop and choose again \n");
+                printf("\n");
+            }
+            else{
+                add_item(&(current->itemList),*removed);
+                printf("User drop item %s at %s",removed->name,current->name);
+                printf("\n");
+            }
+        }
         else if(!strcmp(token,"exit")){
             printf("exited \n");
+            printf("\n");
             break;
         }
         else{

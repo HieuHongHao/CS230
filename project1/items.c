@@ -3,10 +3,12 @@
 #include <string.h>
 #include "items.h"
 
-void add_item(Item * head ,Item item){
+void add_item(Item ** headPointer ,Item item){
+    Item * head = *headPointer;
     if(head == NULL){
-        *head = item;
-        head->nextItem = NULL;
+        *headPointer = (Item * )malloc(sizeof(Item));
+        **headPointer = item;
+        (*headPointer)->nextItem = NULL;
         return;
     }
     Item * temp = head;
@@ -19,17 +21,19 @@ void add_item(Item * head ,Item item){
         temp = temp->nextItem;
     }
 }
-Item * remove_item(Item * head, char * name){
+Item * remove_item(Item ** headPointer, char * name){
+    Item * head = *headPointer;
     if(head == NULL){
         return NULL;
     }
-    if(head->nextItem == NULL){    // Item list only have one item
-        if(!strcmp(name,head->name)){
-            Item * removedItem  = head;
-            head =  NULL;
-            return removedItem;
-        }
-        return NULL; // removed item not found
+    if(!strcmp(name,head->name)){
+            Item * removed  = head;
+            if(head->nextItem != NULL){
+               *headPointer = head->nextItem;
+            }else{
+                *headPointer = NULL;
+            }
+            return removed;   
     }
     Item * prev = head;
     Item * current = head->nextItem;
