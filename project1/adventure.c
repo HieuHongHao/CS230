@@ -324,6 +324,7 @@ int main() {
                 while (temp != NULL) {
                     if (!strcmp(answerChar.name, temp -> name)) {
                         matched[1] = "Character match";
+                        matches++;
                         break;
                     }
                     temp = temp -> nextCharacter;
@@ -334,6 +335,7 @@ int main() {
                 while (tempItem != NULL) {
                     if (!strcmp(answerItem.name, tempItem -> name)) {
                         matched[2] = "Item match";
+                        matches++;
                         break;
                     }
                     tempItem = tempItem -> nextItem;
@@ -357,7 +359,10 @@ int main() {
             printf("exited \n");
             printf("\n");
             break;
-        } else {
+        } else if(!strcmp(token,"key")){
+            printf("%s uses %s to kill someone in %s \n",answerChar.name,answerItem.name,answerRoom.name);
+        }
+        else {
             printf("Command has space after or command is not in the list of regconized commands \n");
             printf("Type help(no space, no uppercase) for commands look up \n");
         }

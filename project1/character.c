@@ -30,6 +30,7 @@ Character* remove_character(Character ** headPointer, char * name){
             Character * removed  = head;
             if(head->nextCharacter != NULL){
                *headPointer = head->nextCharacter;
+               removed->nextCharacter = NULL;
             }else{
                 *headPointer = NULL;
             }
@@ -39,7 +40,7 @@ Character* remove_character(Character ** headPointer, char * name){
     Character * current = head->nextCharacter;
     while(current !=  NULL){
         if(!strcmp(name,current->name)){  // A bit weird but strcmp returns 0, so !0 means name == current->name
-            Character * removed = prev->nextCharacter;
+            Character * removed = current;
             if(removed->nextCharacter != NULL){
                 removed->nextCharacter = NULL;
             }
